@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const config = require('./config');
 const logger = require('./utils/logger');
@@ -28,11 +29,20 @@ app.use('/health', healthRoutes);
 app.use('/api', apiLimiter, apiRoutes);
 
 // ── Static build (production) ──────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, 'build')));
+const buildPath = path.join(__dirname, 'build');
+const indexPath = path.join(buildPath, 'index.html');
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+if (fs.existsSync(indexPath)) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => res.sendFile(indexPath));
+} else {
+  app.get('/', (req, res) => {
+    res.status(503).send(
+      '<h1>Build required</h1><p>Run <code>npm run build</code> first, then <code>npm run server</code>.</p>' +
+        '<p>Or use dev setup: Terminal 1: <code>npm start</code> (port 3000), Terminal 2: <code>npm run dev</code> (port 3002).</p>'
+    );
+  });
+}
 
 // ── Error handling (must be last) ──────────────────────────────────────────────
 app.use(notFound);

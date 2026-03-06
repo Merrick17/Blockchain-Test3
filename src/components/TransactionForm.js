@@ -2,12 +2,8 @@ import React, { useState } from 'react';
 import './TransactionForm.css';
 import { addTransaction } from '../api/blockchain.api';
 
-const TransactionForm = ({ onTransactionAdded }) => {
-  const [formData, setFormData] = useState({
-    fromAddress: '',
-    toAddress: '',
-    amount: '',
-  });
+const TransactionForm = ({ onTransactionAdded, wallet }) => {
+  const [formData, setFormData] = useState({ toAddress: '', amount: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -18,16 +14,25 @@ const TransactionForm = ({ onTransactionAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!wallet) {
+      setMessage('Create a wallet first to send transactions');
+      return;
+    }
     setLoading(true);
     setMessage('');
 
     try {
-      await addTransaction(formData.fromAddress, formData.toAddress, formData.amount);
+      await addTransaction(
+        wallet.publicKey,
+        formData.toAddress,
+        formData.amount,
+        wallet.privateKey
+      );
       setMessage('Transaction added successfully!');
-      setFormData({ fromAddress: '', toAddress: '', amount: '' });
+      setFormData({ toAddress: '', amount: '' });
       onTransactionAdded();
     } catch (err) {
-      setMessage(err.message || 'Failed to add transaction');
+      setMessage(err.response?.data?.error || err.message || 'Failed to add transaction');
     } finally {
       setLoading(false);
     }
@@ -36,20 +41,16 @@ const TransactionForm = ({ onTransactionAdded }) => {
   return (
     <div className="transaction-form">
       <h2 className="panel-title">Create Transaction</h2>
-      
+      {!wallet && (
+        <p className="wallet-required">Create a wallet above to send transactions.</p>
+      )}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="fromAddress">From Address</label>
-          <input
-            type="text"
-            id="fromAddress"
-            name="fromAddress"
-            value={formData.fromAddress}
-            onChange={handleChange}
-            placeholder="e.g., address1"
-            required
-          />
-        </div>
+        {wallet && (
+          <div className="form-group">
+            <label>From Address</label>
+            <code className="form-address">{wallet.publicKey}</code>
+          </div>
+        )}
         
         <div className="form-group">
           <label htmlFor="toAddress">To Address</label>
@@ -59,8 +60,9 @@ const TransactionForm = ({ onTransactionAdded }) => {
             name="toAddress"
             value={formData.toAddress}
             onChange={handleChange}
-            placeholder="e.g., address2"
+            placeholder="Recipient public key (hex)"
             required
+            disabled={!wallet}
           />
         </div>
         
@@ -76,6 +78,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
             step="0.01"
             min="0"
             required
+            disabled={!wallet}
           />
         </div>
         
@@ -85,7 +88,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
           </div>
         )}
         
-        <button type="submit" className="submit-button" disabled={loading}>
+        <button type="submit" className="submit-button" disabled={loading || !wallet}>
           {loading ? 'Adding...' : 'Add Transaction'}
         </button>
       </form>
