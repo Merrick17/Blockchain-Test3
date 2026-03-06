@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Wallet.css';
 import { createWallet, fetchBalance } from '../api/blockchain.api';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Wallet component - generates key pairs and displays address and balance.

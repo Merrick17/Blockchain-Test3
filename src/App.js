@@ -9,6 +9,9 @@ import Wallet from './components/Wallet';
 
 import useBlockchain from './hooks/useBlockchain';
 import { mineBlock } from './api/blockchain.api';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 function App() {
   const { chain, stats, loading, error, refresh } = useBlockchain();
