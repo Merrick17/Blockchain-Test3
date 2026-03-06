@@ -6,6 +6,41 @@
   margin-bottom: 20px;
 }
 
+.wallet-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.wallet-panel-header .panel-title {
+  margin: 0;
+}
+
+.refetch-balance-button {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.refetch-balance-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.refetch-balance-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .wallet-hint {
   margin-bottom: 15px;
   color: #666;

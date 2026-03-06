@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Wallet.css';
 import { createWallet, fetchBalance } from '../api/blockchain.api';
 
@@ -10,7 +10,24 @@ const Wallet = ({ onWalletChange }) => {
   const [wallet, setWallet] = useState(null);
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const loadBalance = useCallback(async () => {
+    if (!wallet?.publicKey) return;
+    try {
+      const res = await fetchBalance(wallet.publicKey);
+      setBalance(res.data?.balance ?? 0);
+    } catch (err) {
+      setBalance(0);
+    }
+  }, [wallet?.publicKey]);
+
+  const handleRefetchBalance = async () => {
+    setBalanceLoading(true);
+    await loadBalance();
+    setBalanceLoading(false);
+  };
 
   const handleCreateWallet = async () => {
     setLoading(true);
@@ -30,22 +47,27 @@ const Wallet = ({ onWalletChange }) => {
 
   useEffect(() => {
     if (!wallet?.publicKey) return;
-    const loadBalance = async () => {
-      try {
-        const res = await fetchBalance(wallet.publicKey);
-        setBalance(res.data?.balance ?? 0);
-      } catch (err) {
-        setBalance(0);
-      }
-    };
     loadBalance();
     const interval = setInterval(loadBalance, 5000);
     return () => clearInterval(interval);
-  }, [wallet?.publicKey]);
+  }, [wallet?.publicKey, loadBalance]);
 
   return (
     <div className="wallet-panel">
-      <h2 className="panel-title">Wallet</h2>
+      <div className="wallet-panel-header">
+        <h2 className="panel-title">Wallet</h2>
+        {wallet && (
+          <button
+            type="button"
+            className="refetch-balance-button"
+            onClick={handleRefetchBalance}
+            disabled={balanceLoading}
+            title="Refresh balance"
+          >
+            {balanceLoading ? '…' : '↻'} Refetch Balance
+          </button>
+        )}
+      </div>
       {!wallet ? (
         <>
           <p className="wallet-hint">Create a cryptographic wallet to send transactions.</p>

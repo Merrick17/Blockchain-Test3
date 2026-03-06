@@ -4,6 +4,7 @@ A blockchain implementation with a layered Express backend and a React frontend.
 
 > **For Applicants:** See [INSTRUCTIONS.md](./INSTRUCTIONS.md) for task requirements (2 tasks, 4–6 hours).
 > See [SETUP.md](./SETUP.md) for a quick-start guide.
+> See [docs/WALLET_AND_MINING.md](./docs/WALLET_AND_MINING.md) for wallet and mining behavior (including balance).
 
 ---
 
@@ -166,8 +167,9 @@ All API responses share a common envelope:
 
 **POST `/api/mine` body:**
 ```json
-{ "miningRewardAddress": "miner1" }
+{ "miningRewardAddress": "<address>" }
 ```
+If omitted, the API uses `miner1`. The frontend passes the current wallet address when mining so rewards go to the user.
 
 ### Balance
 

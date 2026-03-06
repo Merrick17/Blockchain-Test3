@@ -16,7 +16,7 @@ function App() {
 
   const handleMine = async () => {
     try {
-      await mineBlock();
+      await mineBlock(wallet?.publicKey || 'miner1');
       await refresh();
     } catch (err) {
       console.error('Mining failed:', err.message);
